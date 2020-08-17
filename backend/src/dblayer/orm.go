@@ -79,7 +79,7 @@ func (db *DBORM) SignOutUserByID(email, pass string) (customer models.Customer, 
 			ID: uint(id),
 		},
 	}
-	return db.Table("Customers").Where(&customer).Update("loggedin", 0), db.Table("Customers").Where(&customer).Update("loggedin", 0).Error
+	return db.Table("Customers").Where(&customer).Update("loggedin", 0).Error
 }
 func (db *DBORM) GetCustomerOrdersByID(id int) (orders []models.Order, err error) {
 	return orders, db.Table("orders").Select("*").Joins("join customers on customers.id = customer_id").Where("customer_id=?,id").Scan(&orders).Error
