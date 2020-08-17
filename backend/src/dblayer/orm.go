@@ -73,8 +73,8 @@ func (db *DBORM) SignInUser(email, pass string) (customer models.Customer, err e
 	return customer, result.Find(&customer).Error
 }
 
-func (db *DBORM) SignOutUserByID(email, pass string) (customer models.Customer, err error) {
-	customer = models.Customer{
+func (db *DBORM) SignOutUserByID(id int) error {
+	customer := models.Customer{
 		Model: gorm.Model{
 			ID: uint(id),
 		},
