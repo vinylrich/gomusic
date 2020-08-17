@@ -1,31 +1,49 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jinzhu/gorm"
+)
 
 //models : 데이터베이스 모델 코딩
 type Product struct { //제품 데이터 모델
-
 	//구조체 태그라는 문법으로 해당 필드가 json 문서에서 어떤 키에 해당하는 지 나타내는 문법
+	gorm.Model
 	Image       string  `json:"img"`
 	ImagAlt     string  `json:"imgalt"`
 	Price       float64 `json:"price"`
-	Promotion   float64 `json:"promotion"`
-	ProductName string  `json:"productname"`
-	Description string  `json:"desc"`
+	Promotion   float64 `json:"promotion"` //sql.NullFloat64
+	ProductName string  `gorm:"column:production" json:"productname"`
+	Description string
 }
+
+func (Product) TableName() string {
+	return "products"
+}
+
 type Customer struct { //고객 데이터 모델
-	FirstName string `json:"firstname"`
-	LastName  string `json:"lastname"`
-	Email     string `json:"email"`
-	LoggedIn  bool   `json:"loggedin"`
+	gorm.Model
+	Name      string  `json:"name"`
+	FirstName string  `gorm:"column:firstname" json:"firstname"`
+	LastName  string  `gorm:"column:lastname" json:"lastname"`
+	Email     string  `gorm:"column:email" json:"email"`
+	Pass      string  `json:"password"`
+	LoggedIn  bool    `gorm:"column:loggedin" json:"loggedin"`
+	Orders    []Order `json:"orders"`
 }
 type Order struct { //주문 데이터 모델
+	gorm.Model
 	Product
 	Customer
-	CustomerID   int       `json:"customer_id"`
-	ProductID    int       `json:"product_id"`
-	Price        float64   `json:"sell_price"`
-	PurchaseDate time.Time `json:"purchase_date"`
+	CustomerID   int       `gorm:"customer_id"`
+	ProductID    int       `gorm:"product_id"`
+	Price        float64   `gorm:"price" json:"sell_price"`
+	PurchaseDate time.Time `gorm:"column:purchase_date" json:"purchase_date"`
+}
+
+func (Order) TableName() string {
+	return "orders"
 }
 
 /*

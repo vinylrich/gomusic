@@ -5,28 +5,39 @@ import (
 )
 
 func RunAPI(address string) error {
+	//Get gin's default engine
 	r := gin.Default()
-	r.GET("/relativepath/to/url", func(c *gin.Context) { //익명함수 gin.Context는 요청 확인과 처리, 응답에 필요한 기능 제공
-		//logic
-	})
-	r.GET("/product", func(c *gin.Context) {
-		//상품 목록 반환
-	})
-	r.GET("/promos", func(c *gin.Context) {
-		//프로모션 목록 반환
-	})
-	r.POST("/users/signin", func(c *gin.Context) {
-		//사용자 로그인 POST
-	})
-	r.POST("/users", func(c *gin.Context) {
-		//사용자 추가
-	})
-	//사용자
-	r.POST("/users/:id/signout", func(c *gin.Context) {
-		//사용자 로그아웃 요청
-	})
+	//Define a handler
+	h, _ := NewHandler()
+	//메인페이지 로드
+	r.GET("/", h.GetMainPage)
+	//get products
+	r.GET("/products", h.GetProducts)
+	//get promos
+	r.GET("/promos", h.GetPromos)
+	/*
+		//post user sign in
+		r.POST("/user/signin", h.SignIn)
+		//post user sign out
+		r.POST("/user/:id/signout", h.SignOut)
+		//get user orders
+		r.GET("/user/:id/orders", h.GetOrders)
+		//post purchase charge
+		r.POST("/user/charge", h.Charge)
+	*/
 
-	r.GET("/user/:id/orders", func(c *gin.Context) {
-		//
-	})
+	userGroup := r.Group("/user")
+	{
+		userGroup.POST("/:id/signout", h.SignOut)
+		userGroup.GET("/:id/orders", h.GetOrders)
+	}
+
+	usersGroup := r.Group("/users")
+	{
+		usersGroup.POST("/charge", h.Charge)
+		usersGroup.POST("/signin", h.SignIn)
+		usersGroup.POST("", h.AddUser)
+	}
+	//return autotls.Run(r, address)
+	return r.Run(address)
 }
