@@ -79,7 +79,7 @@ func (db *DBORM) SignOutUserByID(email, pass string) (customer models.Customer, 
 			ID: uint(id),
 		},
 	}
-	return db.Table("Customers").Where(&customer).Update("loggedin", 0).Error
+	return db.Table("Customers").Where(&customer).Update("loggedin", 0), db.Table("Customers").Where(&customer).Update("loggedin", 0).Error
 }
 func (db *DBORM) GetCustomerOrdersByID(id int) (orders []models.Order, err error) {
 	return orders, db.Table("orders").Select("*").Joins("join customers on customers.id = customer_id").Where("customer_id=?,id").Scan(&orders).Error
@@ -99,7 +99,7 @@ func hashPassword(s *string) error {
 	return nil
 }
 func (db *DBORM) AddOrder(order models.Order) error {
-	return db.Create(&order).error
+	return db.Create(&order).Error
 }
 func (db *DBORM) GetCreditCardCID(id int) (string, error) {
 	customerWithCCID := struct {
@@ -110,5 +110,5 @@ func (db *DBORM) GetCreditCardCID(id int) (string, error) {
 }
 func (db *DBORM) SaveCreditCardForCustomer(id int, ccid string) error {
 	result := db.Table("customers").Where("id=?", id) //select * from customers where id=id
-	return result.Update("cc_customerid", ccid).error
+	return result.Update("cc_customerid", ccid).Error
 }
