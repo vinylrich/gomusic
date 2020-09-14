@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/ajtwoddltka/gomusic/backend/src/rest"
 )
+	"github.com/ajtwoddltka/gomusic/backend/src/rest"
 
 func main() {
 	log.Println("Main log.....")

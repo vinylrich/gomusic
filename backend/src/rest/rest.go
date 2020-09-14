@@ -8,7 +8,7 @@ func RunAPI(address string) error {
 	//Get gin's default engine
 	r := gin.Default()
 	//Define a handler
-	h, _ := NewHandler()
+	h, _ := NewHandler("mysql", "127.0.0.1:3300")
 	//메인페이지 로드
 	r.GET("/", h.GetMainPage)
 	//get products

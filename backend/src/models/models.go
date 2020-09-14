@@ -24,7 +24,6 @@ func (Product) TableName() string {
 
 type Customer struct { //고객 데이터 모델
 	gorm.Model
-	Name      string  `json:"name"`
 	FirstName string  `gorm:"column:firstname" json:"firstname"`
 	LastName  string  `gorm:"column:lastname" json:"lastname"`
 	Email     string  `gorm:"column:email" json:"email"`

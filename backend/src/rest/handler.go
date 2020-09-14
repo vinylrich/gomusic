@@ -10,9 +10,11 @@ import (
 	"github.com/ajtwoddltka/gomusic/backend/src/models"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/stripe/stripe-go"
 )
 
 type HandlerInterface interface { //핸들러 모음
+	GetMainPage(c *gin.Context)
 	GetProducts(c *gin.Context)
 	GetPromos(c *gin.Context)
 	AddUser(c *gin.Context)
@@ -25,14 +27,8 @@ type Handler struct {
 	db dblayer.DBLayer
 }
 
-func NewHandler() (*Handler, error) { //handler 생성자에 데이터베이스 연결 코드 추가
-	db, err := dblayer.NewORM("mysql", "user:toor@localhost:3300/gomusic")
-	if err != nil {
-		return nil, err
-	}
-	return &Handler{
-		db: db,
-	}, nil
+func NewHandler(db, constring string) (HandlerInterface, error) { //handler 생성자에 데이터베이스 연결 코드 추가
+	return new(Handler), nil
 }
 
 func (h *Handler) GetMainPage(c *gin.Context) {
@@ -79,7 +75,6 @@ func (h *Handler) SignIn(c *gin.Context) {
 	}
 	var customer models.Customer
 	err := c.ShouldBindJSON(&customer)
-	customer, err = h.db.SignInUser(customer)
 	if err != nil { //StatusInternalServerError = http 서버 에러 처리
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -144,7 +139,7 @@ func (h *Handler) GetOrders(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	orders, err = h.db.GetCustomerOrdersByID(id)
+	orders, err := h.db.GetCustomerOrdersByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -155,7 +150,7 @@ func (h *Handler) GetOrders(c *gin.Context) {
 //신용카드 결제
 func (h *Handler) Charge(c *gin.Context) {
 	if h.db == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"body": "server database error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "server database error"})
 		return
 	}
 	request := struct {
@@ -193,16 +188,16 @@ func (h *Handler) Charge(c *gin.Context) {
 		cp.SetSource(request.Token)
 		customer, err := customer.New(cp)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error", err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 	}
 	stripeCustomerID = customer.ID
 	if request.Remember {
 		//스트라이브 사용자 id를 저장하고 데이터베이스에 저장된 사용자 id와 연결
-		err.h.db.SaveCreditCardForCustomer(request.CustomerID, stripeCustomerID) //스트라이프 사용자 id저장
+		err = h.db.SaveCreditCardForCustomer(request.CustomerID, stripeCustomerID) //스트라이프 사용자 id저장
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error", error.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 	}
@@ -230,9 +225,10 @@ func MyCustomLogger() gin.HandlerFunc {
 
 	}
 }
-func RunAPIWithHandler(address string, h HandlerInterface) error {
-	r := gin.Default()
-	r.Use(MyCustomLogger())
-	// r:=gin.New()//두 개 이상의 미들웨어가 필요하면 USE()메스드의 인자에 추가
-	// r.Use(MyCustomLogger()...)
-}
+
+// func RunAPIWithHandler(address string, h HandlerInterface) error {
+// 	r := gin.Default()
+// 	r.Use(MyCustomLogger())
+// 	// r:=gin.New()//두 개 이상의 미들웨어가 필요하면 USE()메스드의 인자에 추가
+// 	// r.Use(MyCustomLogger()...)
+// }
