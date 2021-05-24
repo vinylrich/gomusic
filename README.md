@@ -1,3 +1,5 @@
+backend Golang을 공부하기 위해 책 Hands on Full Stack Development with Go Gomusic project를 따라한 레포지토리입니다. 
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
